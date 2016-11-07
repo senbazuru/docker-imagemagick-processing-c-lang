@@ -19,25 +19,19 @@ RUN yum install -y \
     libcurl-devel \
     openssl-devel \
     glib2-devel \
-    gdb \
+    gdb 
 RUN yum clean all
 
-
-RUN mkdir -p $IMAGEMAGICK_PREFIX/src \
-&& cd $IMAGEMAGICK_PREFIX/src \
-&& curl -sL http://www.imagemagick.org/download/releases/$IMAGEMAGICK_ARCHIVE -o $IMAGEMAGICK_ARCHIVE \
-&& tar xf $IMAGEMAGICK_ARCHIVE \
-&& rm $IMAGEMAGICK_ARCHIVE \
-&& cd ImageMagick-$IMAGEMAGICK_VERSION \
-&& ./configure --prefix=$IMAGEMAGICK_PREFIX --enable-shared --disable-openmp --disable-opencl --without-x \
-&& make \
-&& make install \
-&& rm -rf $IMAGEMAGICK_PREFIX/share \
-&& rm -rf $IMAGEMAGICK_PREFIX/src
+RUN mkdir -p ${IMAGEMAGICK_PREFIX}/src
+WORKDIR ${IMAGEMAGICK_PREFIX}/src 
+RUN curl -sL https://raw.githubusercontent.com/senbazuru/imagemagicks/master/$IMAGEMAGICK_ARCHIVE  -o $IMAGEMAGICK_ARCHIVE 
+RUN tar zxvf ${IMAGEMAGICK_ARCHIVE} && rm $IMAGEMAGICK_ARCHIVE 
+WORKDIR ImageMagick-$IMAGEMAGICK_VERSION 
+RUN ./configure --prefix=$IMAGEMAGICK_PREFIX --enable-shared --disable-openmp --disable-opencl --without-x
+RUN make && make install 
+RUN rm -rf $IMAGEMAGICK_PREFIX/share $IMAGEMAGICK_PREFIX/src
 
 RUN echo $IMAGEMAGICK_PREFIX/lib/ > $IMAGEMAGICK_LD_CONF && ldconfig
 
 ENV PATH /opt/ImageMagick/bin/:$PATH
-
-
 
